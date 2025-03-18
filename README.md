@@ -28,7 +28,7 @@ This Flutter application is a **Task Manager**, built as part of a practical exa
   - **routes/** → App navigation using **GoRouter**.
   - **providers/** → State management using **Riverpod**.
   - **models/** → Data models for tasks.
-  - **pages/** → UI components and screens.
+  - **Views/** → UI components and screens.
   - **constants/** → Global constants and theme configurations.
 
 ### ✅ Theming & Dark Mode
@@ -46,7 +46,7 @@ lib/
 ├── router/        # Application routes (GoRouter)
 ├── providers/     # Riverpod providers & state management
 ├── models/        # Data models for tasks
-├── pages/         # UI screens and components
+├── Views/         # UI screens and components
 ├── constants/     # Theme, colors, and app-wide constants
 ├── services/      # Firebase & local storage services
 └── utils/         # Helper functions & utilities
