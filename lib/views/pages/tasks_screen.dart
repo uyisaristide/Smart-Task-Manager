@@ -67,15 +67,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 itemBuilder: (BuildContext context) {
                   return [
                     PopupMenuItem<int>(
-                      value: 0,
+                      value: 2,
                       child: Row(
                         children: [
                           SvgPicture.asset(
-                            'assets/svgs/calender.svg',
+                            'assets/svgs/task.svg',
                             width: 15,
                           ),
                           const SizedBox(width: 10),
-                          buildText('Sort by date', kBlackColor, textSmall,
+                          buildText('Sort by priority', kBlackColor, textSmall,
                               FontWeight.normal, TextAlign.start, TextOverflow.clip),
                         ],
                       ),
@@ -89,25 +89,26 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             width: 15,
                           ),
                           const SizedBox(width: 10),
-                          buildText('Completed tasks', kBlackColor, textSmall,
+                          buildText('Sort by status', kBlackColor, textSmall,
                               FontWeight.normal, TextAlign.start, TextOverflow.clip),
                         ],
                       ),
                     ),
                     PopupMenuItem<int>(
-                      value: 2,
+                      value: 0,
                       child: Row(
                         children: [
                           SvgPicture.asset(
-                            'assets/svgs/task.svg',
+                            'assets/svgs/calender.svg',
                             width: 15,
                           ),
                           const SizedBox(width: 10),
-                          buildText('Pending tasks', kBlackColor, textSmall,
+                          buildText('Sort by date', kBlackColor, textSmall,
                               FontWeight.normal, TextAlign.start, TextOverflow.clip),
                         ],
                       ),
                     ),
+
                   ];
                 },
                 child: Padding(

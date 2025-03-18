@@ -66,7 +66,7 @@ lib/
 ## Setup Instructions
 1. **Clone the repository:**
    ```sh
-   git clone <repository-url>
+   git clone https://github.com/uyisaristide/Smart-Task-Manager.git
    cd task_manager
    ```
 2. **Install dependencies:**
