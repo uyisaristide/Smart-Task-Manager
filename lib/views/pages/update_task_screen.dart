@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:task_manager/providers/riverpod_providers/tasks_provider.dart';
 
 import '../../../components/custom_app_bar.dart';
 import '../../../utils/color_palette.dart';
@@ -10,16 +12,16 @@ import '../../model/task_model.dart';
 import '../../utils/font_sizes.dart';
 import '../../../components/build_text_field.dart';
 
-class UpdateTaskScreen extends StatefulWidget {
+class UpdateTaskScreen extends ConsumerStatefulWidget {
   final TaskModel taskModel;
 
   const UpdateTaskScreen({super.key, required this.taskModel});
 
   @override
-  State<UpdateTaskScreen> createState() => _UpdateTaskScreenState();
+  ConsumerState<UpdateTaskScreen> createState() => _UpdateTaskScreenState();
 }
 
-class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
+class _UpdateTaskScreenState extends ConsumerState<UpdateTaskScreen> {
   TextEditingController title = TextEditingController();
   TextEditingController description = TextEditingController();
 
@@ -57,7 +59,9 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var taskState = ref.watch(taskProvider);
     var size = MediaQuery.of(context).size;
+    print(widget.taskModel.id);
     return AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -182,12 +186,15 @@ class _UpdateTaskScreenState extends State<UpdateTaskScreen> {
                                     completed: widget.taskModel.completed,
                                     startDateTime: _rangeStart,
                                     stopDateTime: _rangeEnd);
-                                // Here you can call your API or other state management solution
-                                // For example, using a simple function or provider
+                                ref.read(taskProvider.notifier).updateTask(taskModel.id, taskModel, context);
                               },
                               child: Padding(
                                 padding: const EdgeInsets.all(0),
-                                child: buildText(
+                                child:  taskState.isLoading
+                                    ? CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                                    : buildText(
                                     'Update',
                                     kWhiteColor,
                                     textMedium,

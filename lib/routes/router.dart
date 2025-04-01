@@ -2,6 +2,8 @@ import 'package:go_router/go_router.dart';
 
 import '../model/task_model.dart';
 import '../page_not_found.dart';
+import '../views/auth_screens/login.dart';
+import '../views/auth_screens/register.dart';
 import '../views/pages/new_task_screen.dart';
 import '../views/pages/tasks_screen.dart';
 import '../views/pages/update_task_screen.dart';
@@ -14,7 +16,14 @@ final GoRouter router = GoRouter(
       path: '/',
       builder: (context, state) => const SplashScreen(),
     ),
-
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const SigninScreen(),
+    ),
+    GoRoute(
+      path: '/newUser',
+      builder: (context, state) =>  RegisterScreen(),
+    ),
     // Tasks Screen Route
     GoRoute(
       path: '/home',

@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   startTimer() async {
     Future.delayed(const Duration(milliseconds: 3000), () {
-      context.go('/home');
+      context.go('/login');
     });
   }
 

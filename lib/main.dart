@@ -14,9 +14,13 @@ void main() async {
 
   await Firebase.initializeApp();
 
-  FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+  );
 
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+  SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -51,7 +55,7 @@ class MyApp extends ConsumerWidget {
           snackBarTheme: const SnackBarThemeData(
               backgroundColor: primarySwatch,
               contentTextStyle:
-              TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
           bottomSheetTheme: const BottomSheetThemeData(
             elevation: 0,
             backgroundColor: Colors.white,
@@ -60,46 +64,37 @@ class MyApp extends ConsumerWidget {
           ),
           elevatedButtonTheme: ElevatedButtonThemeData(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(primarySwatch),
-                padding: WidgetStateProperty.all(const EdgeInsets.all(14)),
-                shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32))),
-                elevation: WidgetStateProperty.all(0),
-              )),
+            backgroundColor: WidgetStateProperty.all(primarySwatch),
+            padding: WidgetStateProperty.all(const EdgeInsets.all(14)),
+            shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32))),
+            elevation: WidgetStateProperty.all(0),
+          )),
           inputDecorationTheme: InputDecorationTheme(
             contentPadding:
-            const EdgeInsets.symmetric(vertical: 12, horizontal: 17),
+                const EdgeInsets.symmetric(vertical: 12, horizontal: 17),
             border: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  width: 0.2,
-                  color: Colors.grey),
+              borderSide: const BorderSide(width: 0.2, color: Colors.grey),
               borderRadius: BorderRadius.circular(3),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  color: Colors.grey),
+              borderSide: const BorderSide(color: Colors.grey),
               borderRadius: BorderRadius.circular(5),
             ),
             enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  width: 0.2,
-                  color: Colors.grey),
+              borderSide: const BorderSide(width: 0.2, color: Colors.grey),
               borderRadius: BorderRadius.circular(5),
             ),
             errorBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  width: 0.2,
-                  color: Colors.grey),
+              borderSide: const BorderSide(width: 0.2, color: Colors.grey),
               borderRadius: BorderRadius.circular(5),
             ),
             disabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                  color: Colors.grey.shade400),
+              borderSide: BorderSide(color: Colors.grey.shade400),
               borderRadius: BorderRadius.circular(5),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderSide: const BorderSide(
-                  color: Colors.red),
+              borderSide: const BorderSide(color: Colors.red),
               borderRadius: BorderRadius.circular(5),
             ),
           ),

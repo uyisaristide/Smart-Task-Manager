@@ -13,7 +13,6 @@ import '../../providers/riverpod_providers/tasks_provider.dart';
 import '../../utils/color_palette.dart';
 import '../widgets/task_item_view.dart';
 
-
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
@@ -26,12 +25,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // await ref.read(districtsProvider.notifier).districts(context);
+      ref.read(taskProvider.notifier).fetchTasks(); // Load tasks on screen load
+    });
+
     super.initState();
-    ref.read(taskProvider.notifier).fetchTasks(); // Load tasks on screen load
   }
 
   @override
   Widget build(BuildContext context) {
+    var user = ref.watch(userProvider);
     var size = MediaQuery.of(context).size;
     final taskState = ref.watch(taskProvider);
 
@@ -43,7 +47,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         child: Scaffold(
           backgroundColor: kWhiteColor,
           appBar: CustomAppBar(
-            title: 'Hi Aristide',
+            title: 'Hi ${user!.user!.email}',
             showBackArrow: false,
             actionWidgets: [
               PopupMenuButton<int>(
@@ -52,15 +56,20 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 ),
                 elevation: 1,
                 onSelected: (value) {
+                  final taskNotifier = ref.read(taskProvider.notifier);
+
                   switch (value) {
-                    case 0:
-                      ref.read(taskProvider.notifier).sortTasksByDate();
+                    case 0: // Sort by start date
+                      taskNotifier.sortTasks(
+                          sortBy: "startDate", ascending: true);
                       break;
-                    case 1:
-                      ref.read(taskProvider.notifier).showCompletedTasks();
+                    case 1: // Sort by completion status
+                      taskNotifier.sortTasks(
+                          sortBy: "completed", ascending: false);
                       break;
-                    case 2:
-                      ref.read(taskProvider.notifier).showPendingTasks();
+                    case 2: // Sort by priority
+                      taskNotifier.sortTasks(
+                          sortBy: "priority", ascending: true);
                       break;
                   }
                 },
@@ -75,8 +84,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             width: 15,
                           ),
                           const SizedBox(width: 10),
-                          buildText('Sort by priority', kBlackColor, textSmall,
-                              FontWeight.normal, TextAlign.start, TextOverflow.clip),
+                          buildText(
+                              'Sort by priority',
+                              kBlackColor,
+                              textSmall,
+                              FontWeight.normal,
+                              TextAlign.start,
+                              TextOverflow.clip),
                         ],
                       ),
                     ),
@@ -89,8 +103,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             width: 15,
                           ),
                           const SizedBox(width: 10),
-                          buildText('Sort by status', kBlackColor, textSmall,
-                              FontWeight.normal, TextAlign.start, TextOverflow.clip),
+                          buildText(
+                              'Sort by completed',
+                              kBlackColor,
+                              textSmall,
+                              FontWeight.normal,
+                              TextAlign.start,
+                              TextOverflow.clip),
                         ],
                       ),
                     ),
@@ -103,12 +122,16 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             width: 15,
                           ),
                           const SizedBox(width: 10),
-                          buildText('Sort by date', kBlackColor, textSmall,
-                              FontWeight.normal, TextAlign.start, TextOverflow.clip),
+                          buildText(
+                              'Sort by start date',
+                              kBlackColor,
+                              textSmall,
+                              FontWeight.normal,
+                              TextAlign.start,
+                              TextOverflow.clip),
                         ],
                       ),
                     ),
-
                   ];
                 },
                 child: Padding(
@@ -142,23 +165,24 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     height: 20,
                   ),
                   taskState.isLoading
-                      ? Center(child: CircularProgressIndicator())
+                      ? const Center(child: CircularProgressIndicator())
                       : Expanded(
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: taskState.tasks.length,
-                      itemBuilder: (context, index) {
-                        return TaskItemView(
-                          taskModel: taskState.tasks[index],
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        return const Divider(
-                          color: kGrey3,
-                        );
-                      },
-                    ),
-                  ),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: taskState.tasks.length,
+                            itemBuilder: (context, index) {
+                              return TaskItemView(
+                                taskModel: taskState.tasks[index],
+                              );
+                            },
+                            separatorBuilder:
+                                (BuildContext context, int index) {
+                              return const Divider(
+                                color: kGrey3,
+                              );
+                            },
+                          ),
+                        ),
                 ],
               ),
             ),

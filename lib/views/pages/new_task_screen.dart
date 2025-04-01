@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:task_manager/model/task_model.dart';
+import 'package:task_manager/providers/riverpod_providers/tasks_provider.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../components/custom_app_bar.dart';
 import '../../../utils/color_palette.dart';
@@ -10,14 +14,14 @@ import '../../utils/font_sizes.dart';
 import '../../utils/util.dart';
 import '../../../components/build_text_field.dart';
 
-class NewTaskScreen extends StatefulWidget {
+class NewTaskScreen extends ConsumerStatefulWidget {
   const NewTaskScreen({super.key});
 
   @override
-  State<NewTaskScreen> createState() => _NewTaskScreenState();
+  ConsumerState<NewTaskScreen> createState() => _NewTaskScreenState();
 }
 
-class _NewTaskScreenState extends State<NewTaskScreen> {
+class _NewTaskScreenState extends ConsumerState<NewTaskScreen> {
   TextEditingController title = TextEditingController();
   TextEditingController description = TextEditingController();
 
@@ -44,6 +48,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var taskState = ref.watch(taskProvider);
     return AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -195,16 +200,44 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                                       ),
                                     ),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    var uuid = Uuid();
+
+                                    final newTask = TaskModel(
+                                      id: uuid.v1(),
+                                      title: title.text,
+                                      description: description.text,
+                                      completed: false,
+                                      startDateTime:
+                                          _rangeStart ?? DateTime.now(),
+                                      stopDateTime: _rangeEnd ??
+                                          DateTime.now()
+                                              .add(const Duration(hours: 1)),
+                                    );
+                                    // try {
+                                    await ref
+                                        .read(taskProvider.notifier)
+                                        .addTask(newTask, context);
+                                    //   print(
+                                    //       "✅ Task added successfully!"); // Debugging step 2
+                                    // } catch (e) {
+                                    //   print(
+                                    //       "❌ Error adding task: $e"); // Debugging step 3
+                                    // }
+                                  },
                                   child: Padding(
                                     padding: const EdgeInsets.all(0),
-                                    child: buildText(
-                                        'Save',
-                                        kWhiteColor,
-                                        textMedium,
-                                        FontWeight.w600,
-                                        TextAlign.center,
-                                        TextOverflow.clip),
+                                    child: taskState.isLoading
+                                        ? CircularProgressIndicator(
+                                            color: Colors.white,
+                                          )
+                                        : buildText(
+                                            'Save',
+                                            kWhiteColor,
+                                            textMedium,
+                                            FontWeight.w600,
+                                            TextAlign.center,
+                                            TextOverflow.clip),
                                   )),
                             ),
                           ],

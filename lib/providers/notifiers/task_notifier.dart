@@ -1,92 +1,140 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../model/task_model.dart';
 
+// Firestore Reference
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+final CollectionReference _tasksCollection = _firestore.collection('tasks');
+
+// Task Notifier
 class TaskNotifier extends StateNotifier<TaskState> {
   TaskNotifier() : super(TaskState.initial());
 
-  // Simulate a Dio instance or data fetching
-  final List<TaskModel> _taskList = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<TaskModel> _allTasks = []; // Store all tasks for searching
 
-  void addTask(TaskModel task) {
-    _taskList.add(task);
-    state = state.copyWith(tasks: _taskList);
-  }
+  Future<void> addTask(TaskModel task, BuildContext context) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      DocumentReference docRef =
+          await _firestore.collection('tasks').add(task.toJson());
+      final newTask =
+          task.copyWith(id: docRef.id); // Use Firestore-generated ID
 
-  void updateTask(String taskId, TaskModel updatedTask) {
-    final taskIndex = _taskList.indexWhere((task) => task.id == taskId);
-    if (taskIndex != -1) {
-      _taskList[taskIndex] = updatedTask;
-      state = state.copyWith(tasks: _taskList);
-    }
-  }
+      // Update Firestore with the correct ID
+      await docRef.update({'id': docRef.id});
+      print("✅ Task added successfully: ${newTask.toJson()}");
 
-  void removeTask(String taskId) {
-    _taskList.removeWhere((task) => task.id == taskId);
-    state = state.copyWith(tasks: _taskList);
-  }
-
-  void markTaskCompleted(String taskId) {
-    final taskIndex = _taskList.indexWhere((task) => task.id == taskId);
-    if (taskIndex != -1) {
-      _taskList[taskIndex] = _taskList[taskIndex].copyWith(completed: true);
-      state = state.copyWith(tasks: _taskList);
+      state = state.copyWith(tasks: [...state.tasks, newTask]);
+    } catch (e) {
+      print("Error adding task: $e");
+    } finally {
+      state = state.copyWith(isLoading: false);
+      context.pop();
     }
   }
 
   Future<void> fetchTasks() async {
-    // Simulate a network request or database fetching
-    await Future.delayed(Duration(seconds: 2));
-    state = state.copyWith(isLoading: true);
+    try {
+      state = state.copyWith(isLoading: true);
+      QuerySnapshot querySnapshot = await _firestore.collection('tasks').get();
 
-    // Add some mock tasks for example purposes
-    _taskList.addAll([
-      TaskModel(
-        id: '1',
-        title: 'Task 1',
-        description: 'Description for Task 1',
-        startDateTime: DateTime.now(),
-        stopDateTime: DateTime.now().add(Duration(hours: 1)),
-      ),
-      TaskModel(
-        id: '2',
-        title: 'Task 2',
-        description: 'Description for Task 2',
-        startDateTime: DateTime.now(),
-        stopDateTime: DateTime.now().add(Duration(hours: 2)),
-      ),
-    ]);
+      List<TaskModel> tasks = querySnapshot.docs
+          .map((doc) => TaskModel.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
 
-    state = state.copyWith(isLoading: false, tasks: _taskList);
-  }
-
-  void sortTasksByDate() {
-    state = state.copyWith(
-      tasks: List.from(state.tasks)..sort((a, b) => a.startDateTime!.compareTo(b.startDateTime)),
-    );
-  }
-
-  void showCompletedTasks() {
-    state = state.copyWith(
-      tasks: state.tasks.where((task) => task.completed).toList(),
-    );
-  }
-
-  void showPendingTasks() {
-    state = state.copyWith(
-      tasks: state.tasks.where((task) => !task.completed).toList(),
-    );
+      _allTasks = tasks; // Store all tasks for search functionality
+      state = state.copyWith(isLoading: false, tasks: tasks);
+    } catch (e) {
+      print("Error fetching tasks: $e");
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   void searchTasks(String query) {
     if (query.isEmpty) {
-      fetchTasks(); // Load all tasks if the search query is empty
+      state = state.copyWith(tasks: _allTasks); // Restore full list
     } else {
+      List<TaskModel> filteredTasks = _allTasks
+          .where((task) =>
+              task.title.toLowerCase().contains(query.toLowerCase()) ||
+              task.description.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+      state = state.copyWith(tasks: filteredTasks);
+    }
+  }
+
+  Future<void> updateTask(
+      String taskId, TaskModel updatedTask, BuildContext context) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      await _firestore
+          .collection('tasks')
+          .doc(taskId)
+          .update(updatedTask.toJson());
+      List<TaskModel> updatedTasks = state.tasks.map((task) {
+        return task.id == taskId ? updatedTask : task;
+      }).toList();
+
+      state = state.copyWith(tasks: updatedTasks);
+    } catch (e) {
+      print("Error updating task: $e");
+    } finally {
+      state = state.copyWith(isLoading: false);
+      context.pop();
+    }
+  }
+
+  Future<void> completeTask(String taskId, TaskModel updatedTask) async {
+    try {
+      await _firestore
+          .collection('tasks')
+          .doc(taskId)
+          .update(updatedTask.toJson());
+      List<TaskModel> updatedTasks = state.tasks.map((task) {
+        return task.id == taskId ? updatedTask : task;
+      }).toList();
+
+      state = state.copyWith(tasks: updatedTasks);
+    } catch (e) {
+      print("Error updating task: $e");
+    }
+  }
+  void sortTasks({String? sortBy, bool ascending = true}) {
+    List<TaskModel> sortedTasks = List.from(state.tasks);
+
+    sortedTasks.sort((a, b) {
+      int result = 0;
+
+      switch (sortBy) {
+        case "completed":
+          result = a.completed.toString().compareTo(b.completed.toString());
+          break;
+        case "startDate":
+          result = a.startDateTime.compareTo(b.startDateTime);
+          break;
+        case "priority":
+          result = a.priority.compareTo(b.priority);
+          break;
+        default:
+          return 0;
+      }
+
+      return ascending ? result : -result;
+    });
+
+    state = state.copyWith(tasks: sortedTasks);
+  }
+  Future<void> removeTask(String taskId) async {
+    try {
+      await _firestore.collection('tasks').doc(taskId).delete();
       state = state.copyWith(
-        tasks: state.tasks
-            .where((task) => task.title.toLowerCase().contains(query.toLowerCase()))
-            .toList(),
-      );
+          tasks: state.tasks.where((task) => task.id != taskId).toList());
+    } catch (e) {
+      print("Error deleting task: $e");
     }
   }
 }
