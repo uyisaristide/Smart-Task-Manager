@@ -4,10 +4,10 @@ import '../model/task_model.dart';
 import '../page_not_found.dart';
 import '../views/auth_screens/login.dart';
 import '../views/auth_screens/register.dart';
-import '../views/pages/new_task_screen.dart';
-import '../views/pages/tasks_screen.dart';
-import '../views/pages/update_task_screen.dart';
 import '../splash_screen.dart';
+import '../views/task/new_task_screen.dart';
+import '../views/task/tasks_screen.dart';
+import '../views/task/update_task_screen.dart';
 
 final GoRouter router = GoRouter(
   routes: [
@@ -51,8 +51,4 @@ final GoRouter router = GoRouter(
   ],
 );
 
-// // Implement this function to fetch TaskModel by ID (you can replace this with your actual logic)
-// TaskModel getTaskById(String taskId) {
-//   // Example of fetching TaskModel, you might need to adjust this based on your app's logic
-//   return TaskModel(id: taskId, title: 'Sample Task', description: 'Sample Task Description');
-// }
+

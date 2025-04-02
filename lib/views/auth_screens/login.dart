@@ -32,9 +32,10 @@ class _SigninScreenState extends ConsumerState<SigninScreen> {
           padding: const EdgeInsets.all(20)
               .copyWith(top: MediaQuery.of(context).padding.top),
           children: [
+            SizedBox(height: 80,),
             Image.asset(
               AssetsUtils.logo,
-              height: 150,
+              height: 80,
             ),
             const SizedBox(
               height: 30,

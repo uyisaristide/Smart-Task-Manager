@@ -34,9 +34,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           padding: const EdgeInsets.all(20)
               .copyWith(top: MediaQuery.of(context).padding.top),
           children: [
+            const SizedBox(height: 80,),
             Image.asset(
               AssetsUtils.logo,
-              height: 150,
+              height: 80,
             ),
             // Padding(
             //   padding: const EdgeInsets.all(0.0),
